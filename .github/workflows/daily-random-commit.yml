@@ -1,0 +1,35 @@
+name: Daily Random Commit
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Make random commits
+        run: |
+          COUNT=$(( (RANDOM % 5) + 1 ))
+          for i in $(seq 1 $COUNT)
+          do
+            echo "$(date) $RANDOM" >> activity.log
+            git add activity.log
+            git commit -m "auto commit $RANDOM"
+            sleep $(( (RANDOM % 10) + 5 ))
+          done
+
+      - name: Push
+        run: git push
